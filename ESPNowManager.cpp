@@ -2,6 +2,10 @@
 
 uint8_t ESPNowManager::receivedData[250]; // Adjust the size as needed
 
+// Initialize function pointers to nullptr
+void (*ESPNowManager::customOnDataSent)(const uint8_t *mac_addr, esp_now_send_status_t status) = nullptr;
+void (*ESPNowManager::customOnDataRecv)(const esp_now_recv_info_t *recv_info, const uint8_t *data, int len) = nullptr;
+
 ESPNowManager::ESPNowManager() : peer_count(0) {}
 
 // Initialize ESP-NOW
@@ -34,7 +38,6 @@ void ESPNowManager::addPeer(const String &peer_addr) {
         peer_count++;
     }
 }
-
 
 // Add multiple peers from a JSON string
 void ESPNowManager::addPeers(const String &macs) {
@@ -73,24 +76,38 @@ void ESPNowManager::sendData(const String &peer_addr, const void *data, size_t l
     }
 }
 
-// Callback for data received
+// Static callback for data received
 void ESPNowManager::onDataRecv(const esp_now_recv_info_t *recv_info, const uint8_t *incomingData, int len) {
     Serial.print("Received data from: ");
     printMacAddress(recv_info->src_addr);
-    // Serial.print("Data: ");
-    // for (int i = 0; i < len; i++) {
-    //     Serial.printf("%02X ", incomingData[i]);
-    // }
-    // Serial.println();
     memcpy(receivedData, incomingData, len);
+
+    // Call custom callback if set
+    if (customOnDataRecv) {
+        customOnDataRecv(recv_info, incomingData, len);
+    }
 }
 
-void ESPNowManager::onDataSent(const uint8_t *mac_addr, esp_now_send_status_t status){
-    // Serial.print("Last Packet Send Status: ");
-    // Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
-    if(status != ESP_NOW_SEND_SUCCESS){
-      Serial.println("Message delivery failed.");
+// Static callback for data sent
+void ESPNowManager::onDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
+    if (status != ESP_NOW_SEND_SUCCESS) {
+        Serial.println("Message delivery failed.");
     }
+
+    // Call custom callback if set
+    if (customOnDataSent) {
+        customOnDataSent(mac_addr, status);
+    }
+}
+
+// Set custom onDataSent callback
+void ESPNowManager::setOnDataSent(void (*callback)(const uint8_t *mac_addr, esp_now_send_status_t status)) {
+    customOnDataSent = callback;
+}
+
+// Set custom onDataRecv callback
+void ESPNowManager::setOnDataRecv(void (*callback)(const esp_now_recv_info_t *recv_info, const uint8_t *data, int len)) {
+    customOnDataRecv = callback;
 }
 
 // Print a MAC address

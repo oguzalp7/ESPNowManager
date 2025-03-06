@@ -14,8 +14,8 @@ public:
     void removePeer(const String &peer_addr); // Remove a peer
     void printPeers(); // Print all connected peers
     void sendData(const String &peer_addr, const void *data, size_t len); // Send data to a peer
-    static void onDataSent(const uint8_t *mac_addr, esp_now_send_status_t status); // Callback for data sent
-    static void onDataRecv(const esp_now_recv_info_t *recv_info, const uint8_t *data, int len); // Callback for data received
+    void setOnDataSent(void (*callback)(const uint8_t *mac_addr, esp_now_send_status_t status)); // Set custom onDataSent callback
+    void setOnDataRecv(void (*callback)(const esp_now_recv_info_t *recv_info, const uint8_t *data, int len)); // Set custom onDataRecv callback
     void debugMacAddress(const String &macStr); // Debug a MAC address
     const uint8_t* getReceivedData() const; // Get the last received data
 
@@ -33,6 +33,14 @@ private:
     uint8_t* macAddressFromStringToByteArray(const String &macStr); // Convert MAC address from string to byte array
     static void printMacAddress(const uint8_t *mac_addr); // Print a MAC address
     void printPeer(const peer_info_t &peer); // Print a single peer's information
+
+    // Function pointers for custom callbacks
+    static void (*customOnDataSent)(const uint8_t *mac_addr, esp_now_send_status_t status);
+    static void (*customOnDataRecv)(const esp_now_recv_info_t *recv_info, const uint8_t *data, int len);
+
+    // Static callback functions
+    static void onDataRecv(const esp_now_recv_info_t *recv_info, const uint8_t *incomingData, int len);
+    static void onDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
 };
 
 #endif // ESP_NOW_MANAGER_H
