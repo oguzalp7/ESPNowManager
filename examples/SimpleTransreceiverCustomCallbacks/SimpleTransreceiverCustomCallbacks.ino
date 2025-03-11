@@ -15,16 +15,12 @@ SampleData receivedData;
 
 // Custom onDataSent callback
 void customOnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
-    Serial.print("Data sent to: ");
-    ESPNowManager::printMacAddress(mac_addr);
     Serial.print("Status: ");
     Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Success" : "Fail");
 }
 
 // Custom onDataRecv callback
 void customOnDataRecv(const esp_now_recv_info_t *recv_info, const uint8_t *data, int len) {
-    Serial.print("Data received from: ");
-    ESPNowManager::printMacAddress(recv_info->src_addr);
     Serial.print("Data length: ");
     Serial.println(len);
 
