@@ -7,7 +7,7 @@
 
 class ESPNowManager {
 public:
-    ESPNowManager(); // Constructor
+    static ESPNowManager* getInstance(); // Singleton instance
     void begin(); // Initialize ESP-NOW
     void addPeer(const String &peer_addr); // Add a single peer
     void addPeers(const String &macs); // Add multiple peers from a JSON string
@@ -20,6 +20,9 @@ public:
     const uint8_t* getReceivedData() const; // Get the last received data
 
 private:
+    ESPNowManager(); // Private constructor for singleton
+    static ESPNowManager* instance; // Singleton instance
+
     struct peer_info_t {
         uint8_t peer_addr[6];
         uint8_t channel;

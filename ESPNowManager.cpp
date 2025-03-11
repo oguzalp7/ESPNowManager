@@ -1,10 +1,18 @@
 #include "ESPNowManager.h"
 
+ESPNowManager* ESPNowManager::instance = nullptr;
 uint8_t ESPNowManager::receivedData[250]; // Adjust the size as needed
 
 // Initialize function pointers to nullptr
 void (*ESPNowManager::customOnDataSent)(const uint8_t *mac_addr, esp_now_send_status_t status) = nullptr;
 void (*ESPNowManager::customOnDataRecv)(const esp_now_recv_info_t *recv_info, const uint8_t *data, int len) = nullptr;
+
+ESPNowManager* ESPNowManager::getInstance() {
+    if (instance == nullptr) {
+        instance = new ESPNowManager();
+    }
+    return instance;
+}
 
 ESPNowManager::ESPNowManager() : peer_count(0) {}
 
